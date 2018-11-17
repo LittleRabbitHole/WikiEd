@@ -22,7 +22,7 @@ for lst in students_controls:
     csv_f.writerow(lst)
 
 
-f = open(dir_file+"endsemester_controlgroup_contributes.csv", "w", encoding="UTF-8")
+f = open("endsemester_controlgroup_contributes.csv", "w", encoding="UTF-8")
 csv_f = csv.writer(f)
 csv_f.writerow(['control_wpid','control_userid', 'register_date', 'timestamp', 'ns',  'title', 'size', 'sizediff'])
 
