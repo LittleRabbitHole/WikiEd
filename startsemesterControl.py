@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Nov 17 12:49:56 2018
+Created on Mon Dec 10 10:34:35 2018
 
-endsemester control group contribution collection
+startsemester control group contribution collection
 
 @author: angli
 """
+
 from utilities import getUserContributions
 import pickle
 import csv
 
 if __name__ == "__main__":
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "final_control_endSemester.pk"
+    file = "final_control_startSemester.pk"
     f = open(dir_file+file, 'rb')   # 'r' for reading; can be omitted
     students_controls = pickle.load(f)          # load file content as mydict
     f.close() 
     
-    csv_f = csv.writer(open(dir_file+"controlgroup_semesterends.csv", "w", encoding="UTF-8"))
+    csv_f = csv.writer(open(dir_file+"controlgroup_semesterstarts.csv", "w", encoding="UTF-8"))
     #write first row
     for lst in students_controls:
         csv_f.writerow(lst)
     
     
-    f = open(dir_file+"endsemester_controlgroup_contributes.csv", "w", encoding="UTF-8")
+    f = open(dir_file+"startemester_controlgroup_contributes.csv", "w", encoding="UTF-8")
     csv_f = csv.writer(f)
     csv_f.writerow(['control_wpid','control_userid', 'register_date', 'timestamp', 'ns',  'title', 'size', 'sizediff'])
     

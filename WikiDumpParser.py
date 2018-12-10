@@ -20,7 +20,7 @@ import os
 
 def WikiParserNewcomers(filedir, file):
     n = 0
-    with open("results.txt", 'w') as x_file:
+    with open("allnewusers_2010.txt", 'w') as x_file:
         for event, elem in etree.iterparse("enwiki-20170420-pages-logging.xml", events=('start', 'end')):
             if event == 'start':
                 if elem.tag == "{http://www.mediawiki.org/xml/export-0.10/}logitem":
