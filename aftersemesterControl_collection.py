@@ -18,10 +18,10 @@ if __name__ == "__main__":
     students_controls = pickle.load(f)          # load file content as mydict
     f.close() 
     
-    csv_f = csv.writer(open(dir_file+"controlgroup_semesterends.csv", "w", encoding="UTF-8"))
-    #write first row
-    for lst in students_controls:
-        csv_f.writerow(lst)
+#    csv_f = csv.writer(open(dir_file+"controlgroup_semesterends.csv", "w", encoding="UTF-8"))
+#    #write first row
+#    for lst in students_controls:
+#        csv_f.writerow(lst)
     
     
     f = open(dir_file+"endsemester_controlgroup_contributes.csv", "w", encoding="UTF-8")
