@@ -47,7 +47,7 @@ def collectionSemester():
         enddate = enddate_timeobject.strftime("%Y-%m-%d")
         endtime = enddate+"T11:59:59Z"
        
-        api_call = "https://en.wikipedia.org/w/api.php?action=query&list=usercontribs&ucuser={}&ucstart={}&ucend={}&ucdir=newer&ucprop=title|timestamp|comment|size|sizediff&uclimit=500&format=json".format(str(student_username), str(starttime), str(endtime))
+        api_call = "https://en.wikipedia.org/w/api.php?action=query&list=usercontribs&ucuserids={}&ucstart={}&ucend={}&ucdir=newer&ucprop=title|timestamp|comment|size|sizediff&uclimit=500&format=json".format(str(student_username), str(starttime), str(endtime))
         contributes = getUserContributions(api_call)
         if contributes != []:
             for feature in contributes:
