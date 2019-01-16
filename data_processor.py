@@ -69,33 +69,80 @@ def semesterAggre(dir_file, file):
     #return    
     return aggre_data        
 
-def TimeStampCheck(data):
-    for ind, row in data.iterrows():
-        timestamp = row['timestamp']
-        if type(timestamp) is str:
-            timestamp = pd.to_datetime(timestamp)
-            today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
-            timedelta = today - pd.to_datetime(row['register_date'])
-            day_index = timedelta.days             
-        elif math.isnan(timestamp):
-            data["timestamp2"].iat[ind] = datetime.datetime.strptime(row["register_date"], '%Y-%m-%d').strftime('%Y-%m-%dT%H:%M:%SZ')
-     
+def Today(row):
+    #return as pd.datetime
+    #for ind, row in data.iterrows():
+    timestamp = row['timestamp']
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        #timedelta = today - pd.to_datetime(row['register_date'])
+        #day_index = timedelta.days             
+    elif math.isnan(timestamp):
+        today = pd.to_datetime(row['register_date'])
+    return  today
+
+
+
+def TimeDelta(row):
+    #for ind, row in data.iterrows():
+    timestamp = row['timestamp']
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        #today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        timedelta = timestamp - pd.to_datetime(row['register_date'])
+        #day_index = timedelta.days             
+    elif math.isnan(timestamp):
+        timedelta = pd.to_datetime("2019-01-15") - pd.to_datetime("2019-01-15") #0
+    return  timedelta
+
+
+def LastEdit(row, last_survivalday, max_timedelta):
+    timedelta = row['day_index_timedelta']
+    timestamp = row['timestamp']
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        #day_index = row["day_index"] 
+        if today == last_survivalday and timedelta == max_timedelta: 
+            last_edit_mark=1
+        else:
+            last_edit_mark=0            
+    elif math.isnan(timestamp):
+        last_edit_mark = 1
+    return  last_edit_mark
+
+
+
+def Death(row, last_survivalday):
+    #for ind, row in data.iterrows():
+    timestamp = row['timestamp']
+    last_censored = row['last_day_censored']
+    last_edit_tillend = (last_censored - last_survivalday).days 
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        #today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        #day_index = row["day_index"] 
+        if row["last_edit_mark"] == 1 and last_edit_tillend>30:
+            death =1
+        else:
+            death=0
+            
+    elif math.isnan(timestamp):
+        death = 1
+    return  death
+
     
 #2016-05-28T22:24:35Z
 def AfterSemesterAggre(dir_file, file):
     data = pd.read_csv(dir_file+file)
-    data['last_day_censored'] = pd.to_datetime("2018-01-15")
-    data = TimeStampCheck(data)
     #data.columns.values
-    #data["timestamp"]=data['timestamp'].map(lambda x: datetime.datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ').strftime('%m/%d/%Y %H:%M:%S') if type(x) is str)
-    data['day'] = data['timestamp2'].map(lambda x: datetime.datetime.strptime(x, '%m/%d/%y  %H:%M').strftime('%m/%d/%Y'))
-    #change to timestamp for furture process
-    data['timestamp'] = pd.to_datetime(data['timestamp'])
-
-    data["day"] = pd.to_datetime(data["day"])
-    data["last_day_censored"] = pd.to_datetime(data["last_day_censored"])
-    data.columns.values
-    data["day_index"] = data["day_diff"]
+    
+    data["day_index_timedelta"] = data.apply(TimeDelta, axis=1)
+    data["today"] = data.apply(Today, axis=1)
+    data['last_day_censored'] = pd.to_datetime("2019-01-15")
+    data["last_edit_mark"] = 0
+    data["death"] = 0
 
     aggre_data=[]
     Grouped = data.groupby(['control_wpid', 'register_date'])
@@ -104,8 +151,23 @@ def AfterSemesterAggre(dir_file, file):
     for pidgroup in Grouped:
         n+=1
         if n%100==0: print (n)
-        #if n==2: break
+        if n==4: break
         control_wpid, register_date = pidgroup[0]
+        
+        day_lst = pidgroup[1][['today','day_index_timedelta']]
+        first_survivalday = day_lst['today'].iloc[0]
+        last_survivalday = day_lst['today'].iloc[-1]
+        max_timedelta = day_lst['day_index_timedelta'].max()
+        #last edit mark
+        pidgroup[1]["last_edit_mark"] = pidgroup[1].apply(LastEdit, axis=1, last_survivalday = last_survivalday, max_timedelta = max_timedelta)
+        pidgroup[1]["death"] = pidgroup[1].apply(Death, axis=1, last_survivalday = last_survivalday)
+        
+        #survival elements
+        lastedit_row = pidgroup[1].loc[pidgroup[1]['last_edit_mark'] == 1]
+        death = lastedit_row['death']
+        dayindex = lastedit_row['day_index_timedelta'].iloc[0].days
+        
+        #efforts
         edit_count = len(list(pidgroup[1]['control_wpid']))
         ave_sizediff = pidgroup[1]['sizediff'].mean()
         if math.isnan(ave_sizediff): ave_sizediff = 0
@@ -141,6 +203,7 @@ if __name__ == "__main__":
     WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_contri_aggre.csv")
     
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
     file = "controlgroup_contributes_afterSemester.csv"
     aggre_data  = semesterAggre(dir_file, file)
     WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_AfterSemester_contri_aggre.csv")
