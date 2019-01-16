@@ -151,6 +151,7 @@ def ControlAfterSemesterAggre(dir_file, file):
 
     aggre_data=[]
     Grouped = data.groupby(['control_wpid', 'register_date'])
+    #Grouped.ngroups
     
     n=0
     for pidgroup in Grouped:
