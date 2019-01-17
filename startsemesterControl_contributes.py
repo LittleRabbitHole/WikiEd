@@ -107,6 +107,58 @@ def collectionControlSemester_survival():
             csv_f.writerow([control_wpid, control_wpid, register_date, "", "", "",0,0])
     f.close()
 
+
+
+def collectionArticleTitleControlSemester():
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    #dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    filename = "control_students_all.csv"
+    
+    f = open(dir_file+filename) 
+    controls = f.readlines()
+    f.close()    
+    
+    #colnames = controls[0].strip().split(",")
+
+    #collecting while writing out
+    f = open(dir_file+"controlgroup_articles_semester.csv", "w", encoding="UTF-8")
+    csv_f = csv.writer(f)
+    csv_f.writerow(['control_wpid','control_userid','starttime','endtime','timestamp','ns','pageid','title'])
+    
+    contributes = []
+    n=0
+    for control in controls[1::]:
+        n+=1
+        if n%100==0: print (n)
+        control_start = control.strip().split(",")
+        student_wpname = control_start[0]
+        control_wpid = control_start[3]
+        register_date = control_start[4]
+        #starttime
+        startdate = control_start[2].strip()
+        #reformat datetime
+        startdate_timeobject = datetime.datetime.strptime(startdate, "%m/%d/%y")
+        startdate = startdate_timeobject.strftime("%Y-%m-%d")
+        starttime = startdate+"T00:00:00Z"
+        
+        #endtime
+        enddate = control_start[-3].strip()
+        #reformat datetime
+        enddate_timeobject = datetime.datetime.strptime(enddate, "%m/%d/%y")
+        enddate = enddate_timeobject.strftime("%Y-%m-%d")
+        endtime = enddate+"T11:59:59Z"
+       
+        api_call = "https://en.wikipedia.org/w/api.php?action=query&list=usercontribs&ucuserids={}&ucstart={}&ucend={}&ucdir=newer&ucnamespace=0&ucprop=ids|title|timestamp|size|sizediff&uclimit=500&format=json".format(str(control_wpid), str(starttime), str(endtime))
+        contributes = getUserContributions(api_call)
+        if contributes != []:
+            for feature in contributes:
+                csv_f.writerow([control_wpid, feature['userid'], starttime, endtime, feature['timestamp'], str(feature['ns']), str(feature['pageid']), feature['title']])
+        else:
+            csv_f.writerow([control_wpid, control_wpid, starttime, endtime, "", "", "",""])
+    f.close()
+
+
+
 #def collectionSemesterStart():
 #    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
 #    file = "final_control_startSemester.pk"
