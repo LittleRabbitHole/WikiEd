@@ -22,6 +22,7 @@ user_data$usertalk_count_log= log(user_data$usertalk_count + 0.1)
 user_data$unique_articles_log= log(user_data$unique_article_numbers + 0.1)
 user_data$user_count_log= log(user_data$user_count + 0.1)
 user_data$ave_sizediff_norm= scale(user_data$ave_sizediff,center = TRUE, scale = TRUE)
+user_data$article_sizediff_norm= scale(user_data$article_sizediff,center = TRUE, scale = TRUE)
 user_data$SurvObj <- with(user_data, Surv(dayindex, death == 1))
 
 user_data$article_edits_log= log(user_data$article_count + 0.1)
