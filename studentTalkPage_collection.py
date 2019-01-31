@@ -31,7 +31,7 @@ import os
 import pandas as pd
 import numpy as np
 from utilities import GetPageRevision
-from data_processor import Today, TimeDelta
+from data_processor import LastEdit, Death
 
 # read the list of users
 
@@ -109,43 +109,109 @@ def talkpageRevisions():
         if n%100==0:
             print (n) 
 
+import math
+def LastEdit1(row, last_survivalday, max_timedelta):
+    #mark the whether the edit is the last edit made by the editor
+    #based on the largest timedelta
+    timedelta = row['day_index_timedelta']
+    timestamp = row['timestamp']
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        #day_index = row["day_index"] 
+        if today == last_survivalday and timedelta == max_timedelta: 
+            last_edit_mark=1
+        else:
+            last_edit_mark=0            
+    elif math.isnan(timestamp):
+        last_edit_mark = 1
+    return  last_edit_mark
 
-if __name__ == "__main__":
-    talkpageRevisions()
+
+
+def Death1(row, last_survivalday):
+    #mark, if the edit row is the last edit, whether it is death or not (no activity >30 days from now)
+    timestamp = row['timestamp']
+    last_censored = row['last_day_censored']
+    last_edit_tillend = (last_censored - last_survivalday).days 
+    if type(timestamp) is str:
+        timestamp = pd.to_datetime(timestamp)
+        #today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
+        #day_index = row["day_index"] 
+        if row["last_edit_mark"] == 1 and last_edit_tillend>30:
+            death =1
+        else:
+            death=0
+            
+    elif math.isnan(timestamp):
+        death = 1
+    return  death
+
+
+
+def dataProcessor():
     studentscohort = usernamesLst()
     
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
     file = "students_talkpage_revisions.csv"
-    data = pd.read_csv(dir_file+file)
+    data = pd.read_csv(dir_file+file, skipinitialspace = True, quotechar = '"')
     
-    data['timestamp'] = pd.to_datetime(data['timestamp'])
+    data['timestamp1'] = pd.to_datetime(data['timestamp'])
     data['register_date'] = pd.to_datetime(data['register_date'])
-    data["day_index_timedelta"] = data['timestamp'] - data['register_date']#as timedelta
+    data["day_index_timedelta"] = data['timestamp1'] - data['register_date']#as timedelta
     data["day_index"] = data["day_index_timedelta"].dt.days
     data["wiki_msgin"] =  data['talkpage_editor'].apply(lambda x: 0 if x in studentscohort else 1)
-    
+    data['last_day_censored'] = pd.to_datetime("2019-01-15")
+    data['today'] = pd.to_datetime(data['timestamp1'].dt.strftime('%Y-%m-%d'))
+    data = data.loc[data['wiki_msgin'] >0]
+
     aggre_data=[]
-    Grouped = data.groupby(['wpid', 'register_date', 'day_index'])
-    #Grouped.ngroups
     
+    Grouped1 = data.groupby(['wpid', 'register_date'])                              
     n=0
-    for pidgroup in Grouped:
+    for group1 in Grouped1:
         n+=1
         if n%100==0: print (n)
         #if n==4: break
-        wpid, register_date, day_index = pidgroup[0]
-        register_date = register_date.strftime('%Y-%m-%d')
+        wpid, register_date = group1[0]
         
-        msgin_lst = list(pidgroup[1]["wiki_msgin"])
-        from_wiki = sum(msgin_lst)
-        from_stu = len(msgin_lst) - from_wiki
-        #unit data
-        pidgroup_data = [wpid, register_date, day_index, from_wiki, from_stu]        
-        aggre_data.append(pidgroup_data)
+        day_lst = group1[1][['today','day_index_timedelta']]
+        first_survivalday = day_lst['today'].iloc[0]
+        last_survivalday = day_lst['today'].iloc[-1]
+        max_timedelta = day_lst['day_index_timedelta'].max()#last edit time - register time
+        #last edit mark
+        group1[1]["last_edit_mark"] = group1[1].apply(LastEdit1, axis=1, last_survivalday = last_survivalday, max_timedelta = max_timedelta)
+        group1[1]["death"] = group1[1].apply(Death1, axis=1, last_survivalday = last_survivalday)
+        
+        #survival elements
+        lastedit_row = group1[1].loc[group1[1]['last_edit_mark'] == 1]
+        death = list(lastedit_row['death'])[0]
+        deathdate = lastedit_row['day_index_timedelta'].iloc[0].days
+        
+        #group for day index
+        subdata = group1[1]
+        
+        Grouped2 = subdata.groupby(['day_index'])
+        #Grouped.ngroups
+        m=0
+        for group2 in Grouped2:
+            m+=1
+            #if m%100==0: print (n)
+            #if m==4: break
+
+            day_index = group2[0]
+            #register_date = register_date.strftime('%Y-%m-%d')
+            
+            msgin_lst = list(group2[1]["wiki_msgin"])
+            from_wiki = sum(msgin_lst)
+            from_stu = len(msgin_lst) - from_wiki
+            #unit data
+            pidgroup_data = [wpid, register_date, death, deathdate, day_index, from_wiki, from_stu]        
+            aggre_data.append(pidgroup_data)
     
     #write out
     i = 0
-    outString = 'wpid,register_date,day_index,from_wiki,from_stu'
+    outString = 'wpid,register_date,death,deathdate,day_index,from_wiki,from_stu'
     for item in aggre_data:
         str_item = [str(i) for i in item]
         i += 1
@@ -156,9 +222,17 @@ if __name__ == "__main__":
 #    if not os.path.exists(result_path):
 #        os.makedirs(result_path)
         
-    with open(dir_file+"studentTalkpage_aggre.csv", 'w') as f:
+    with open(dir_file+"studentTalkpageWiki_aggre.csv", 'w') as f:
         f.write(outString)
         f.close()
+
+
+
+
+if __name__ == "__main__":
+    
+    talkpageRevisions()
+    dataProcessor()
 
 # =============================================================================
 # ##########################################
