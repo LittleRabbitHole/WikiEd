@@ -79,7 +79,7 @@ def articleQualityDict(artlestacks):
     final_dict = {}
     #len(final_dict.keys())
     n=0
-    for stack in students_stackedrevids:
+    for stack in students_stackedrevids[610:]:
         n+=1
         if n%10==0: print(n)
         revids = stack.split("|")
@@ -88,8 +88,8 @@ def articleQualityDict(artlestacks):
         for revid in revids:
             final_dict[revid] = stackresult.get(revid)
         
-    
-    
+pickle.dump( final_dict, open( dir_file+"temp_final_dict.p", "wb" ) ) 
+   
           
 def articleQualityWP10(url):
     '''
