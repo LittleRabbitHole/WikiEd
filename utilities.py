@@ -43,17 +43,19 @@ def GetPageRevision(url):
         response=requests.get(url + next)
         responsedata = returnJsonCheck(response)        
         page_id = list(responsedata["query"]["pages"].keys())[0]
-        revision_data_lst=responsedata['query']['pages'][page_id]['revisions']
-        revisions += revision_data_lst  #adds all revisions from the current request to the list
-
-        try:        
-            cont = responsedata['continue']['rvcontinue']
-        except KeyError:                                      #break the loop if 'continue' element missing
+        revision_data_lst=responsedata['query']['pages'][page_id].get('revisions')
+        if revision_data_lst is not None:
+            revisions += revision_data_lst  #adds all revisions from the current request to the list
+    
+            try:        
+                cont = responsedata['continue']['rvcontinue']
+            except KeyError:                                      #break the loop if 'continue' element missing
+                break
+    
+            next = "&rvcontinue=" + cont             #gets the revision Id from which to start the next request
+        else:
             break
-
-        next = "&rvcontinue=" + cont             #gets the revision Id from which to start the next request
-
-    return revisions
+    return page_id, revisions
 
 
 
