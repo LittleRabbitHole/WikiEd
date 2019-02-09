@@ -5,11 +5,12 @@ library(coxme)
 require(lme4)
 require(lmerTest)
 
-setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
+setwd("/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 
 ####During semester#######
 user_data = read.csv("duringSocialization_effort_retention.csv")
 colnames(user_data)
+user_data$courseID[1]
 user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
@@ -36,6 +37,40 @@ summary(medfit)
 ls_means(medfit, pairwise=TRUE)
 
 # (group > individual/control, control < indiv/group)
+
+
+####During semester quality#######
+user_data = read.csv("duringSocializationQuliaty_editorunit.csv", stringsAsFactors=FALSE)
+user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
+user_data$start_quallevel_prob = as.numeric(as.character(user_data$start_quallevel_prob))
+user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
+
+user_data$start_qual = user_data$start_quallevel + user_data$start_quallevel_prob
+
+user_data$end_quallevel = as.numeric(as.character(user_data$end_quallevel))
+user_data$end_quallevel_prob = as.numeric(as.character(user_data$end_quallevel_prob))
+user_data$end_qual_aggre = as.numeric(as.character(user_data$end_qual_aggre))
+
+user_data$end_qual = user_data$end_quallevel + user_data$end_quallevel_prob
+
+user_data$diff = user_data$end_qual - user_data$start_qual
+user_data$diff2 = user_data$end_qual_aggre - user_data$start_qual_aggre
+user_data = na.omit(user_data)
+#user_data = user_data[which(user_data$article_count>0),]
+
+user_data$control_wikied = as.factor(user_data$control_wikied)
+summary(user_data$control_wikied)
+user_data$indiv_group = as.factor(user_data$indiv_group)
+summary(user_data$indiv_group)
+
+user_data$class_size_log= log(user_data$class_size + 0.1)
+
+summary(user_data$diff)
+
+medfit <- lmer(diff ~ indiv_group + control_wikied 
+               + class_size_log + (1|courseID), data = user_data)
+
+summary(medfit)
 
 ##retention##
 model2a1 <- coxph(SurvObj ~ article_edit_log + talk_count_log + usertalk_count_log
