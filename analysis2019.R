@@ -41,6 +41,12 @@ ls_means(medfit, pairwise=TRUE)
 
 ####During semester quality#######
 user_data = read.csv("duringSocializationQuliaty_editorunit.csv", stringsAsFactors=FALSE)
+user_data = read.csv("duringSocializationQuality_articleunit.csv", stringsAsFactors=FALSE)
+colnames(user_data)
+
+median(user_data$unique_article_numbers[which(user_data$control_wikied == 1)])
+median(user_data$unique_article_numbers[which(user_data$control_wikied == -2)])
+
 user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
 user_data$start_quallevel_prob = as.numeric(as.character(user_data$start_quallevel_prob))
 user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
@@ -55,7 +61,8 @@ user_data$end_qual = user_data$end_quallevel + user_data$end_quallevel_prob
 
 user_data$diff = user_data$end_qual - user_data$start_qual
 user_data$diff2 = user_data$end_qual_aggre - user_data$start_qual_aggre
-user_data = na.omit(user_data)
+user_data[is.na(user_data)] <- 0
+#user_data = na.omit(user_data)
 #user_data = user_data[which(user_data$article_count>0),]
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
@@ -69,8 +76,12 @@ summary(user_data$diff)
 
 medfit <- lmer(diff ~ indiv_group + control_wikied 
                + class_size_log + (1|courseID), data = user_data)
-
 summary(medfit)
+
+medfit <- lmer(diff ~ indiv_group
+               + class_size_log + (1|courseID), data = user_data)
+
+ls_means(medfit, pairwise=TRUE)
 
 ##retention##
 model2a1 <- coxph(SurvObj ~ article_edit_log + talk_count_log + usertalk_count_log

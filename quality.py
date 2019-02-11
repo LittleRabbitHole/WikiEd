@@ -139,6 +139,7 @@ def finalScore(scoresProb_dict):
     
           
 def attachRevidScores(articleextend_lst, score_dict):
+    #geiven revid, find score from score_dict
     articleextend_scores_lsts = []
     for article in articleextend_lst:
         revid0 = str(article[-2])
@@ -223,22 +224,26 @@ if __name__ == "__main__":
     student_articles_df.columns = ['username','userid', 'courseid','title','startdate']
     student_articles_df['username'] = student_articles_df['username'].apply(str)
     student_articles_df['userid'] = student_articles_df['userid'].apply(int).apply(str)
-    ##make article author:
+    ##make article author for future use:
     student_articlesauthor_dict =  article_author(student_articles_df) #article-student
     student_author_dict = article_author2(student_articles_df) #student-article
     
                                               
     students_articles = student_allcontri[['title', 'startdate', 'enddate','student_courseID']].drop_duplicates()
-    students_articleextend_lst = articleRevision(students_articles) 
+    
+    ###this part is done
+    #students_articleextend_lst = articleRevision(students_articles) 
     #['title', 'startdate', 'enddate','student_courseID', 'pageid', 'parent_start', 'start_revid', 'end_revid']
-    pickle.dump( students_articleextend_lst, open( dir_file+"students_articlelst_forquality.p", "wb" ) )
+    #pickle.dump( students_articleextend_lst, open( dir_file+"students_articlelst_forquality.p", "wb" ) )
     
     #students info with 4 time points, and 2 time scores
     students_articleextend_lst = pickle.load( open( dir_file+"students_articlelst_forquality.p", "rb" ) ) 
     students_stackedrevids = revidStackLst(students_articleextend_lst)
+    
     #collect the quality score
     #student_score_dict = articleQualityDict(students_stackedrevids)
     #pickle.dump( student_score_dict, open( dir_file+"student_score_dict.p", "wb" ) ) 
+
     student_score_dict = pickle.load( open( dir_file+"student_score_dict.p", "rb" ) )      
     student_articlescores = attachRevidScores(students_articleextend_lst, student_score_dict)
     #['title', 'startdate', 'enddate','student_courseID', 'pageid', 'parent_start', 'start_revid', 'end_revid', revid0_predicted, revid0_predicted_prob, revid0_aggre_score, revid1_predicted, revid1_predicted_prob, revid1_aggre_score]
@@ -276,9 +281,10 @@ if __name__ == "__main__":
     control_articles_df['startdate'] = pd.to_datetime(control_articles_df['startdate']).dt.strftime('%Y-%m-%d')
     control_articles_df['username'] = control_articles_df['username'].apply(int).apply(str)
     control_articles_df['userid'] = control_articles_df['userid'].apply(int).apply(str)
-    ##make article author:
-    control_articlesauthor_dict =  article_author(control_articles_df) #article-control
     
+    ##for future use:
+    ##make article author:
+    control_articlesauthor_dict =  article_author(control_articles_df) #article-control    
     ##control-article dictionary
     control_author_dict = article_author2(control_articles_df) #control-article
    
@@ -294,10 +300,13 @@ if __name__ == "__main__":
     
     #control info with 4 time points, and 2 time scores
     control_articleextend_lst = pickle.load( open( dir_file+"control_articlelst_forquality.p", "rb" ) ) 
-    control_stackedrevids = revidStackLst(control_articleextend_lst)
+    
+    ###this part is done
+    #control_stackedrevids = revidStackLst(control_articleextend_lst)
     #collect the quality score
     #control_score_dict2 = articleQualityDict(control_stackedrevids)
     #pickle.dump( control_score_dict2, open( dir_file+"control_score_dict2.p", "wb" ) ) 
+    
     control_score_dict = pickle.load( open( dir_file+"control_score_dict2.p", "rb" ) )      
     control_articlescores = attachRevidScores(control_articleextend_lst, control_score_dict)
     #['title', 'startdate', 'enddate', 'pageid', 'parent_start', 'start_revid', 'end_revid', revid0_predicted, revid0_predicted_prob, revid0_aggre_score, revid1_predicted, revid1_predicted_prob, revid1_aggre_score]
@@ -344,19 +353,19 @@ if __name__ == "__main__":
                 scores = 6*[""]
         if scores is None:
             scores = 6*[""]
-        itemlst_extend =  itemlst + scores   
+        itemlst_extend =  itemlst + title + scores   
         finalscorelist.append(itemlst_extend)
 
 
     i = 0
-    outString = 'control_wpid,courseID,key,startdate,article_count,unique_article_numbers,group,class_size,control_wikied,indiv_group,pageid,start_quallevel,start_quallevel_prob,start_qual_aggre,end_quallevel,end_quallevel_prob,end_qual_aggre'
+    outString = '"control_wpid","courseID","key","startdate","article_count","unique_article_numbers","group","class_size","control_wikied","indiv_group","title","author_prop","pageid","start_quallevel","start_quallevel_prob","start_qual_aggre","end_quallevel","end_quallevel_prob","end_qual_aggre"'
     for lst in finalscorelist:
         i += 1
-        strlst = [str(x) for x in lst]
+        strlst = ['"{}"'.format(str(x)) for x in lst]
         outString += '\n'
         outString += ','.join(strlst)
                 
-    with open(dir_file+"quality2.csv", 'w') as f:
+    with open(dir_file+"quality3.csv", 'w') as f:
         f.write(outString)
         f.close()
 
