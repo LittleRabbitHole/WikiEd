@@ -6,6 +6,7 @@ require(lme4)
 require(lmerTest)
 
 setwd("/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
+setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 
 ####During semester#######
 user_data = read.csv("duringSocialization_effort_retention.csv")
@@ -43,12 +44,38 @@ znorm <- function(ts){
   (ts - ts.mean)/ts.dev
 }
 
-hist(znorm(user_data$article_sizediff), breaks = 100)
-hist(user_data$article_sizediff_norm)
-medfit <- lmer(znorm(user_data$article_sizediff) ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
-medfit <- lmer(article_sizediff_norm ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+
+#look at the content edit size as indication of quality
+user_data = read.csv("duringSocialization_articleSize.csv")
+colnames(user_data)
+user_data$courseID[1]
+user_data[is.na(user_data)] <- 0
+
+user_data$control_wikied = as.factor(user_data$control_wikied)
+summary(user_data$control_wikied)
+user_data$indiv_group = as.factor(user_data$indiv_group)
+
+user_data$class_size_log= log(user_data$class_size + 0.1)
+user_data$article_edit_log= log(user_data$article_count + 0.1)
+user_data$talk_count_log= log(user_data$talk_count + 0.1) 
+user_data$usertalk_count_log= log(user_data$usertalk_count + 0.1)
+user_data$unique_articles_log= log(user_data$unique_article_numbers + 0.1)
+user_data$user_count_log= log(user_data$user_count + 0.1)
+user_data$ave_sizediff_norm= scale(user_data$ave_sizediff,center = TRUE, scale = TRUE)
+
+user_data$article_sizeadded_norm= scale(user_data$article_sizeadded,center = TRUE, scale = TRUE)
+summary(log(user_data$article_sizeadded+2381029))
+
+
+medfit <- lmer(log(user_data$article_sizeadded+2381029) ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
 summary(medfit)
 ls_means(medfit, pairwise=TRUE)
+
+hist(znorm(user_data$article_sizeadded), breaks = 100)
+hist(user_data$article_sizeadded_norm)
+
+medfit <- lmer(znorm(user_data$article_sizediff) ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
+
 
 
 ####During semester quality#######

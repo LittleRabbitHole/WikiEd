@@ -14,9 +14,9 @@ import datetime
 
 def WriteOut_Lst2Str2(lst, filename):
     i = 0
-    #outString = 'control_wpid,register_date,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
+    outString = 'control_wpid,register_date,edit_count,ave_sizediff,article_sizediff,article_sizeadded,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     #outString = 'control_wpid,register_date,death,dayindex,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
-    outString = 'student_username,student_courseID,startdate,enddate,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
+    #outString = 'student_username,student_courseID,startdate,enddate,edit_count,ave_sizediff,article_sizediff,article_sizeadded,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     #outString = 'student_username,student_courseID,startdate,enddate,death,dayindex,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     for item in lst:
         str_item = [str(i) for i in item]
@@ -54,6 +54,8 @@ def ControlSemesterAggre(dir_file, file):
         article_df = all_df.loc[all_df['ns'] == 0]
         article_sizediff = article_df['sizediff'].mean()
         if math.isnan(article_sizediff): article_sizediff = 0
+        article_sizeadded = article_df['sizediff'].sum()
+        if math.isnan(article_sizeadded): article_sizeadded = 0
         # article type count
         articleType_list = list(pidgroup[1]['ns'])
         article_count = articleType_list.count(0) #edits in article
@@ -66,7 +68,7 @@ def ControlSemesterAggre(dir_file, file):
         article_lst = list(set([title_lst[j] for j in article_index]))
         unique_article_numbers = len(article_lst)
         #unit data
-        pidgroup_data = [control_wpid, register_date, edit_count, ave_sizediff, article_sizediff, article_count, talk_count, user_count, usertalk_count, unique_article_numbers]        
+        pidgroup_data = [control_wpid, register_date, edit_count, ave_sizediff, article_sizediff, article_sizeadded, article_count, talk_count, user_count, usertalk_count, unique_article_numbers]        
         aggre_data.append(pidgroup_data)
     
     #return    
@@ -96,6 +98,8 @@ def StudentSemesterAggre(dir_file, file):
         article_df = all_df.loc[all_df['ns'] == 0]
         article_sizediff = article_df['sizediff'].mean()
         if math.isnan(article_sizediff): article_sizediff = 0
+        article_sizeadded = article_df['sizediff'].sum()
+        if math.isnan(article_sizeadded): article_sizeadded = 0
         # article type count
         articleType_list = list(pidgroup[1]['ns'])
         article_count = articleType_list.count(0) #edits in article
@@ -108,7 +112,7 @@ def StudentSemesterAggre(dir_file, file):
         article_lst = list(set([title_lst[j] for j in article_index]))
         unique_article_numbers = len(article_lst)
         #unit data
-        pidgroup_data = [student_username, student_courseID, startdate, enddate, edit_count, ave_sizediff, article_sizediff, article_count, talk_count, user_count, usertalk_count, unique_article_numbers]        
+        pidgroup_data = [student_username, student_courseID, startdate, enddate, edit_count, ave_sizediff, article_sizediff, article_sizeadded, article_count, talk_count, user_count, usertalk_count, unique_article_numbers]        
         aggre_data.append(pidgroup_data)
     
     #return    
@@ -313,13 +317,13 @@ if __name__ == "__main__":
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
     file = "controlgroup_contributes_semester.csv"
     aggre_data  = ControlSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_contri_aggre.csv")
+    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_contri_aggre_v2.csv")
 
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    #dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
     file = "students_contributes_semester.csv"
     aggre_data  = StudentSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_contri_aggre.csv")
+    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_contri_aggre_v2.csv")
 
     
     dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
