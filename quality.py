@@ -169,6 +169,7 @@ def courseInfoDict(dir_file, coureseInfofile):
 def article_author(df):
     '''
     attribute article with an author who made the most contribution within the semester
+    also return total # of authors for this article
     '''
     article_author_dict = {}
     articlegrouped = df.groupby('title')

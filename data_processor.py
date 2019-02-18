@@ -349,9 +349,42 @@ if __name__ == "__main__":
    
     
     
+def quality():
+    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/"
+    file = "duringSocializationQuality_uniqueArticleUnit.csv"
+    
+    data = pd.read_csv(dir_file+file)
+    data.columns.values
+    
+    article_author_alllist = []
+    articlegrouped = data.groupby(["pageid","selected","author","courseID","author_prop","group","control_wikied","indiv_group","classsize"])
+    
+    n=0
+    for articlegroup in articlegrouped:
+        n+=1
+        if n%100==0: print (n)
+        #if n==2: break
+        uniqueArticle = list(articlegroup[0])
+        groupdata_scores = articlegroup[1][["start_quallevel","start_quallevel_prob","start_qual_aggre","end_quallevel","end_quallevel_prob","end_qual_aggre"]]
+        groupdata_scores_lst = list(groupdata_scores.mean())
+        uniqueArticle_score_lst = uniqueArticle + groupdata_scores_lst
+        article_author_alllist.append(uniqueArticle_score_lst)
+    return article_author_alllist
     
     
-    
+def writeout(article_author_alllist):
+    i = 0
+    outString = '"pageid","selected","author","courseID","author_prop","group","control_wikied","indiv_group","classsize","start_quallevel","start_quallevel_prob","start_qual_aggre","end_quallevel","end_quallevel_prob","end_qual_aggre"'
+    for lst in article_author_alllist:
+        i += 1
+        strlst = [str(x) for x in lst]
+        outString += '\n'
+        outString += ','.join(strlst)
+                
+    with open(dir_file+"duringSocializationQuality_uniqueArticleUnit2.csv", 'w') as f:
+        f.write(outString)
+        f.close()
+
     
     
     
