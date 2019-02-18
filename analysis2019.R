@@ -67,7 +67,7 @@ user_data$article_sizeadded_norm= scale(user_data$article_sizeadded,center = TRU
 summary(log(user_data$article_sizeadded+2381029))
 
 
-medfit <- lmer(log(user_data$article_sizeadded+2381029) ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+medfit <- lm(article_sizeadded ~ indiv_group+ control_wikied  + class_size_log, data = user_data)
 summary(medfit)
 ls_means(medfit, pairwise=TRUE)
 
@@ -75,6 +75,8 @@ hist(znorm(user_data$article_sizeadded), breaks = 100)
 hist(user_data$article_sizeadded_norm)
 
 medfit <- lmer(znorm(user_data$article_sizediff) ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
+summary(medfit)
+ls_means(medfit, pairwise=TRUE)
 
 
 
