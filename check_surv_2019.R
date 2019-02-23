@@ -35,6 +35,16 @@ model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_l
 
 summary(model2a1) 
 
+model2a1_fit <- survfit(coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
+                                #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
+                                class_size_log
+                              + indiv_group
+                              + cluster(courseID)
+                              +strata(indiv_group),
+                              #ties = "breslow",
+                              data = user_data))
+ggsurvplot(model2a1_fit,data = user_data, fun = "cumhaz")
+
 
 model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                    #+ user_count_log + unique_articles_log  + ave_sizediff_norm +

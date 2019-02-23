@@ -149,7 +149,7 @@ colnames(user_data)
 user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
-user_data$indiv_group = as.factor(user_data$indiv_group2)
+user_data$indiv_group = as.factor(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)
@@ -182,6 +182,7 @@ model2a1_fit <- survfit(coxph(SurvObj ~ #article_edit_log + talk_count_log + use
                           +strata(indiv_group),
                           #ties = "breslow",
                           data = user_data))
+ggsurvplot(model2a1_fit,data = user_data)
 
 model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                   #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
@@ -193,7 +194,6 @@ model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_l
                   data = user_data)
 
 summary(model2a1) 
-ggsurvplot(model2a1_fit,data = user_data, fun = "events")
 
 ####only students interaction####
 user_data = read.csv("duringSocializationCommunication.csv")
