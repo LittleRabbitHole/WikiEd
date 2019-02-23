@@ -1,3 +1,5 @@
+library(ggfortify)
+
 library(survminer)
 library(survival)
 library(KMsurv)
@@ -7,16 +9,19 @@ require(lmerTest)
 
 setwd("/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
+#IF(VLOOKUP(C:C,fullstudentset_group.csv!$C:$I,7,0)="","",VLOOKUP(C:C,fullstudentset_group.csv!$C:$I,7,0))
 
 ####During semester#######
 user_data = read.csv("duringSocialization_effort_retention.csv")
+user_data = na.omit(user_data)
+
 colnames(user_data)
-user_data$courseID[1]
-user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
 summary(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$indiv_group)
+
+summary(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)
@@ -139,12 +144,12 @@ AIC(model2a1)
 
 
 ####after semester#######
-user_data = read.csv("afterSocialization_effort_retention.csv")
+user_data = read.csv("afterSocialization_effort_retention_v2.csv")
 colnames(user_data)
 user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
-user_data$indiv_group = as.factor(user_data$indiv_group)
+user_data$indiv_group = as.factor(user_data$indiv_group2)
 
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)
@@ -168,7 +173,17 @@ ls_means(medfit)
 # (control < indiv/group)
 
 ##retention##
-model2a1 <- coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
+model2a1_fit <- survfit(coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
+                            #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
+                            class_size_log
+                          + control_wikied  
+                          + indiv_group
+                          + cluster(courseID)
+                          +strata(indiv_group),
+                          #ties = "breslow",
+                          data = user_data))
+
+model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                   #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
                     class_size_log
                   + control_wikied  
@@ -176,10 +191,9 @@ model2a1 <- coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_
                   + cluster(courseID),
                   #ties = "breslow",
                   data = user_data)
+
 summary(model2a1) 
-AIC(model2a1) 
-
-
+ggsurvplot(model2a1_fit,data = user_data, fun = "events")
 
 ####only students interaction####
 user_data = read.csv("duringSocializationCommunication.csv")

@@ -14,10 +14,10 @@ import datetime
 
 def WriteOut_Lst2Str2(lst, filename):
     i = 0
-    outString = 'control_wpid,register_date,edit_count,ave_sizediff,article_sizediff,article_sizeadded,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
+    #outString = 'control_wpid,register_date,edit_count,ave_sizediff,article_sizediff,article_sizeadded,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     #outString = 'control_wpid,register_date,death,dayindex,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     #outString = 'student_username,student_courseID,startdate,enddate,edit_count,ave_sizediff,article_sizediff,article_sizeadded,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
-    #outString = 'student_username,student_courseID,startdate,enddate,death,dayindex,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
+    outString = 'student_username,student_courseID,startdate,enddate,death,dayindex,edit_count,ave_sizediff,article_sizediff,article_count,talk_count,user_count,usertalk_count,unique_article_numbers'
     for item in lst:
         str_item = [str(i) for i in item]
         i += 1
@@ -120,7 +120,7 @@ def StudentSemesterAggre(dir_file, file):
 
 
 
-def Today(row):
+def Today(row, setdate_colname = 'register_date'):
     #return as pd.datetime
     #for ind, row in data.iterrows():
     timestamp = row['timestamp']
@@ -130,18 +130,18 @@ def Today(row):
         #timedelta = today - pd.to_datetime(row['register_date'])
         #day_index = timedelta.days             
     elif math.isnan(timestamp):
-        today = pd.to_datetime(row['register_date'])
+        today = pd.to_datetime(row[setdate_colname])
     return  today
 
 
 
-def TimeDelta(row):
+def TimeDelta(row, countfromdate_colname):
     #output (edit time - register date) as pd.timedelta
     timestamp = row['timestamp']
     if type(timestamp) is str:
         timestamp = pd.to_datetime(timestamp)
         #today = pd.to_datetime(timestamp.strftime('%Y-%m-%d'))
-        timedelta = timestamp - pd.to_datetime(row['register_date'])
+        timedelta = timestamp - pd.to_datetime(row[countfromdate_colname])#'register_date'
         #day_index = timedelta.days             
     elif math.isnan(timestamp):
         timedelta = pd.to_datetime("2019-01-15") - pd.to_datetime("2019-01-15") #0
@@ -185,15 +185,24 @@ def Death(row, last_survivalday):
         death = 1
     return  death
 
+ 
+def survivalManipulate(dir_file, file, cutdate = "2017-06-01"):
+    data = pd.read_csv(dir_file+file)
+    data["today"] = data.apply(Today, setdate_colname = 'enddate', axis=1)#as datetime
+    cutdate_dt = pd.to_datetime(cutdate)
+       
+    data = data.loc[data["today"] < cutdate_dt]
+    return data
     
+
 #2016-05-28T22:24:35Z
 #Control--after semester aggregation with survival information
 def ControlAfterSemesterAggre(dir_file, file):
     data = pd.read_csv(dir_file+file)
     #data.columns.values
     
-    data["day_index_timedelta"] = data.apply(TimeDelta, axis=1)#as timedelta
-    data["today"] = data.apply(Today, axis=1)#as datetime
+    data["day_index_timedelta"] = data.apply(TimeDelta, countfromdate_colname='register_date', axis=1)#as timedelta
+    data["today"] = data.apply(Today, setdate_colname = 'register_date', axis=1)#as datetime
     data['last_day_censored'] = pd.to_datetime("2019-01-15")
     #data["last_edit_mark"] = 0
     #data["death"] = 0
@@ -251,20 +260,21 @@ def ControlAfterSemesterAggre(dir_file, file):
 
 
 #Student--after semester aggregation with survival information
-def StudentAfterSemesterAggre(dir_file, file):
-    data = pd.read_csv(dir_file+file)
+#def StudentAfterSemesterAggre(dir_file, file, last_day_censored = "2019-01-15"):
+#    data = pd.read_csv(dir_file+file)
     #data.columns.values
-    
-    data['register_date'] = data['startdate']
-    data["day_index_timedelta"] = data.apply(TimeDelta, axis=1)#as timedelta
-    data["today"] = data.apply(Today, axis=1)#as datetime
-    data['last_day_censored'] = pd.to_datetime("2019-01-15")
+def StudentAfterSemesterAggre(data, last_day_censored = "2019-01-15"):    
+    data['register_date'] = data['enddate']
+    data["day_index_timedelta"] = data.apply(TimeDelta, countfromdate_colname='enddate', axis=1)#as timedelta
+    data["today"] = data.apply(Today, setdate_colname = 'register_date', axis=1)#as datetime
+    data['last_day_censored'] = pd.to_datetime(last_day_censored)
+    #data = data.loc[data["day_index_timedelta"]>pd.Timedelta('0 days')]
     #data["last_edit_mark"] = 0
     #data["death"] = 0
 
     aggre_data=[]
     Grouped = data.groupby(['student_username', 'student_courseID', 'startdate','enddate'])
-    #Grouped.ngroups
+    Grouped.ngroups
     
     n=0
     for pidgroup in Grouped:
@@ -312,45 +322,7 @@ def StudentAfterSemesterAggre(dir_file, file):
     
     #return    
     return aggre_data  
-    
-if __name__ == "__main__":
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "controlgroup_contributes_semester.csv"
-    aggre_data  = ControlSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_contri_aggre_v2.csv")
-
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    #dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "students_contributes_semester.csv"
-    aggre_data  = StudentSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_contri_aggre_v2.csv")
-
-    
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "controlgroup_contributes_afterSemester.csv"
-    aggre_data  = ControlAfterSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_AfterSemester_contri_aggre.csv")
-    
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "students_contributes_aftersemester.csv"
-    aggre_data  = StudentAfterSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"students_AfterSemester_contri_aggre.csv")
-    
-    #semester control survival
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "controlgroup_contributes_semester_survival.csv"
-    aggre_data  = ControlAfterSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_survival_aggre.csv")
-    
-    #semester student survival
-    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    file = "students_contributes_semester_survival.csv"
-    aggre_data  = StudentAfterSemesterAggre(dir_file, file)
-    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_survival_aggre.csv")
-   
+       
     
     
 def quality():
@@ -390,8 +362,54 @@ def writeout(article_author_alllist):
         f.close()
 
     
+if __name__ == "__main__":
+    #during semester effort
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    file = "controlgroup_contributes_semester.csv"
+    aggre_data  = ControlSemesterAggre(dir_file, file)
+    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_contri_aggre_v2.csv")
+
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    #dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    file = "students_contributes_semester.csv"
+    aggre_data  = StudentSemesterAggre(dir_file, file)
+    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_contri_aggre_v2.csv")
+
+    #after semester + survival
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    file = "controlgroup_contributes_afterSemester.csv"
+    aggre_data  = ControlAfterSemesterAggre(dir_file, file)
+    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_AfterSemester_contri_aggre.csv")
     
+    #censor date = 2019-01-15
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    file = "students_contributes_aftersemester.csv"
+    aggre_data  = StudentAfterSemesterAggre(dir_file, file)
+    WriteOut_Lst2Str2(aggre_data, dir_file+"students_AfterSemester_contri_aggre_v2.csv")
     
+    #change censor date
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    file = "students_contributes_aftersemester.csv"   
+    data = survivalManipulate(dir_file, file, cutdate = "2017-01-01")    
+    aggre_data  = StudentAfterSemesterAggre(data, last_day_censored = "2017-01-01")
+    WriteOut_Lst2Str2(aggre_data, dir_file+"students_AfterSemester_contri_aggre_censor_170101.csv")
+    
+    #semester control survival
+#    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+#    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+#    file = "controlgroup_contributes_semester_survival.csv"
+#    aggre_data  = ControlAfterSemesterAggre(dir_file, file)
+#    WriteOut_Lst2Str2(aggre_data, dir_file+"controlgroup_semester_survival_aggre.csv")
+    
+#    #student survival
+#    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+#    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+#    file = "students_contributes_semester_survival.csv" #original file
+#    aggre_data  = StudentAfterSemesterAggre(dir_file, file)
+#    WriteOut_Lst2Str2(aggre_data, dir_file+"student_semester_survival_aggre_v2.csv")
+#    
+#    
     
     
     
