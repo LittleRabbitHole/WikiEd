@@ -7,7 +7,9 @@ library(KMsurv)
 setwd("/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 
+updatedGroup = read.csv("fullstudentset_updatedgroup.csv")
 user_data = read.csv("afterSocialization_effort_retention_v2.csv")
+updatedGroup = user_data[c("control_wpid","key","group_recheck")]
 user_data = read.csv("students_AfterSemester_contri_aggre_censor_170601.csv")
 user_data = read.csv("retention_170301.csv")
 user_data = read.csv("students_AfterSemester_contri_aggre_censor_170101.csv")
@@ -22,7 +24,7 @@ colnames(user_data)
 user_data$class_size_log= log(user_data$class_size + 0.1)
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
-user_data$indiv_group = as.factor(user_data$indiv_group)
+user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
 user_data$SurvObj <- with(user_data, Surv(dayindex, death == 1))
