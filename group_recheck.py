@@ -10,6 +10,7 @@ import pandas as pd
 from collections import Counter
 
 dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
 file = "students_contributes_semester.csv"
 coureseInfofile = "2015_2016_student_courses_list.csv"
 
@@ -52,7 +53,7 @@ def countThresh(count_dict, n=1):
         if k[1] <= 1:
             print (k)
             del count_dict[k]
-    return main_dict
+    return count_dict
 
 from itertools import dropwhile
 
@@ -74,7 +75,7 @@ wikied_group = {}
 n=0
 for title, wikied_lst in article_dict.items():
     n+=1
-    #if n==2: break
+    if n==2: break
     if len(list(set(wikied_lst))) > 1:
         courseid = [course_dict.get(wikied) for wikied in  wikied_lst]
         count_dict = Counter([t for cell in courseid for t in cell])
