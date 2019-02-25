@@ -143,10 +143,12 @@ AIC(model2a1)
 ####after semester#######
 user_data = read.csv("afterSocialization_effort_retention_v2.csv")
 colnames(user_data)
-user_data[is.na(user_data)] <- 0
+#user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$indiv_group)
+user_data$indiv_group = as.factor(user_data$group_recheck)
+summary(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)

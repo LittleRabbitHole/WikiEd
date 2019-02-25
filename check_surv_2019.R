@@ -8,13 +8,13 @@ setwd("/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Pr
 setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/")
 
 updatedGroup = read.csv("fullstudentset_updatedgroup.csv")
+
 user_data = read.csv("afterSocialization_effort_retention_v2.csv")
-updatedGroup = user_data[c("control_wpid","key","group_recheck")]
 user_data = read.csv("students_AfterSemester_contri_aggre_censor_170601.csv")
 user_data = read.csv("retention_170301.csv")
 user_data = read.csv("students_AfterSemester_contri_aggre_censor_170101.csv")
 
-#user_data = na.omit(user_data)
+user_data = na.omit(user_data)
 
 
 #user_data = user_data[which(user_data$return==0),]
@@ -57,6 +57,15 @@ model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_l
                  + control_wikied
                  + cluster(courseID),
                  #ties = "breslow",
+                 data = user_data)
+
+model2a1 <-coxme(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
+                   #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
+                   class_size_log
+                 + indiv_group
+                 + control_wikied
+                 + (1|courseID),
+                 ties = "breslow",
                  data = user_data)
 
 summary(model2a1) 
