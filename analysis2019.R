@@ -87,29 +87,21 @@ user_data = read.csv("duringSocializationQuliaty_editorunit.csv", stringsAsFacto
 user_data = read.csv("duringSocializationQuality_uniqueArticleUnit2.csv", stringsAsFactors=FALSE)
 user_data = user_data[which(user_data$author_prop==1),]
 
-user_data = read.csv("duringSocializationQuality_uniqueArticleUnit2.csv", stringsAsFactors=FALSE)
-user_data = user_data[c("pageid", "control_wikied", "indiv_group", "courseID","classsize", "start_qual_aggre",  "end_qual_aggre")]
+user_data = read.csv("duringSocializationQuality_uniqueArticleUnit_share.csv", stringsAsFactors=FALSE)
+#user_data = user_data[c("pageid", "control_wikied", "indiv_group", "courseID","classsize", "start_qual_aggre",  "end_qual_aggre")]
 user_data = unique(user_data)
 colnames(user_data)
 
-user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
-user_data$start_quallevel_prob = as.numeric(as.character(user_data$start_quallevel_prob))
 user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
-
-user_data$start_qual = user_data$start_quallevel + user_data$start_quallevel_prob
-
-user_data$end_quallevel = as.numeric(as.character(user_data$end_quallevel))
-user_data$end_quallevel_prob = as.numeric(as.character(user_data$end_quallevel_prob))
 user_data$end_qual_aggre = as.numeric(as.character(user_data$end_qual_aggre))
 
-user_data$end_qual = user_data$end_quallevel + user_data$end_quallevel_prob
 
-user_data$diff = user_data$end_qual - user_data$start_qual
 user_data$diff2 = user_data$end_qual_aggre - user_data$start_qual_aggre
 #user_data[is.na(user_data)] <- 0
 user_data = na.omit(user_data)
 #user_data = user_data[which(user_data$article_count>0),]
 
+colnames(user_data)
 user_data$control_wikied = as.factor(user_data$control_wikied)
 summary(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$indiv_group)

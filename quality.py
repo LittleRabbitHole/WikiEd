@@ -208,6 +208,7 @@ def article_author2(df):
 
 if __name__ == "__main__":
     dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
+    dir_file = "/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
     studentfile = "students_contributes_semester.csv"
     controlfile = "controlgroup_contributes_semester.csv"
     alltimepoint = "control_students_all.csv"
@@ -403,6 +404,7 @@ if __name__ == "__main__":
     
     unique_data = [list(x) for x in set(tuple(x) for x in final_article_score_lst)]
     pickle.dump( unique_data, open( dir_file+"final_article_score_lst.p", "wb" ) )
+    unique_data = pickle.load( open( dir_file+"final_article_score_lst.p", "rb" ) ) 
     #'title,pageid,group,classsize,start_quallevel,start_quallevel_prob,start_qual_aggre,end_quallevel,end_quallevel_prob,end_qual_aggre'
     
     i = 0
