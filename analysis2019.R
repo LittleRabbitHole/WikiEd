@@ -149,22 +149,12 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 
 med1.fit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
 summary(med1.fit)
-medfit <- lmer(article_edits_log ~ control_wikied  + class_size_log + (1|courseID), data = user_data)
-ls_means(medfit)
+medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+ls_means(medfit, pairwise=TRUE)
 
 # (control < indiv/group)
 
 ##retention##
-model2a1_fit <- survfit(coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
-                            #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
-                            class_size_log
-                          + control_wikied  
-                          + indiv_group
-                          + cluster(courseID)
-                          +strata(indiv_group),
-                          #ties = "breslow",
-                          data = user_data))
-ggsurvplot(model2a1_fit,data = user_data)
 
 model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                   #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
@@ -211,7 +201,7 @@ length(unique(user_data$courseID))
 
 model2a1 <- coxph(SurvObj ~ #reach_out_stu_log + reach_out_wiki_log + reach_in_stu_log + reach_in_wiki_log
                     #+ group_group 
-                  score_diff
+                  #score_diff
                   + cluster(courseID)
                   + article_edit_log + talk_count_log +usertalk_count_log+ user_count_log+unique_articles_log + ave_sizediff_norm + student_count_log, 
                   data = user_data)
@@ -220,7 +210,7 @@ summary(model2a1)
 
 model2a2 <- coxph(SurvObj ~ reach_out_stu_log + reach_out_wiki_log + reach_in_stu_log + reach_in_wiki_log
                   + group_group 
-                  + score_diff
+                  #+ score_diff
                   + article_edit_log + talk_count_log +usertalk_count_log+ user_count_log+unique_articles_log + ave_sizediff_norm + student_count_log
                   + cluster(courseID), 
                   data = user_data)
