@@ -95,11 +95,14 @@ colnames(user_data)
 user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
 user_data$end_qual_aggre = as.numeric(as.character(user_data$end_qual_aggre))
 
+user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
+user_data$end_quallevel = as.numeric(as.character(user_data$end_quallevel))
 
+user_data$diff1 = user_data$end_quallevel - user_data$start_quallevel
 user_data$diff2 = user_data$end_qual_aggre - user_data$start_qual_aggre
 #user_data[is.na(user_data)] <- 0
-user_data = na.omit(user_data)
-#user_data = user_data[which(user_data$article_count>0),]
+#user_data = na.omit(user_data)
+
 
 colnames(user_data)
 user_data$control_wikied = as.factor(user_data$control_wikied)
@@ -109,9 +112,17 @@ summary(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$classsize + 0.1)
 
-summary(user_data$diff2)
+user_data_stu = user_data[which(user_data$control_wikied==1),]
+summary(user_data_stu$diff2)
+summary(user_data_stu$diff1)
+medfit <- lmer(diff1 ~ #start_quallevel
+               +control_wikied 
+               + class_size_log + (1|courseID), data = user_data)
+summary(medfit)
+ls_means(medfit)
 
-medfit <- lm(diff2 ~ indiv_group + control_wikied, data = user_data)
+
+
 
 
 medfit <- lmer(diff2 ~ indiv_group + control_wikied 
