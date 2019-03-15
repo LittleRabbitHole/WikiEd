@@ -187,6 +187,29 @@ def article_author(df):
     return article_author_dict
 
 
+def article_author_lst(df):
+    '''
+    article -- author list.
+    find all authors for this article
+    '''
+    article_author_dict = {}
+    articlegrouped = df.groupby('title')
+    n=0
+    for articlegroup in articlegrouped:
+        n+=1
+        if n%100==0: print (n)
+        #if n==2: break
+        title = articlegroup[0]
+        userids_lst = [str(int(x)) for x in list(articlegroup[1]['userid'])]
+        userids_lst = list(set(userids_lst))
+        #userid, times = Counter(userids_lst).most_common(1)[0]
+        #author = userid
+        #proportion = times/len(userids_lst)
+        article_author_dict[title] = userids_lst
+    return article_author_dict
+
+
+
 def article_author2(df):
     '''
     attribute each editor with an article who made the most contribution within the semester
@@ -225,8 +248,10 @@ if __name__ == "__main__":
     student_articles_df.columns = ['username','userid', 'courseid','title','startdate']
     student_articles_df['username'] = student_articles_df['username'].apply(str)
     student_articles_df['userid'] = student_articles_df['userid'].apply(int).apply(str)
+    
     ##make article author for future use:
     student_articlesauthor_dict =  article_author(student_articles_df) #article-student
+    student_articles_authorlist_dict = article_author_lst(student_articles_df)
     student_author_dict = article_author2(student_articles_df) #student-article
     
                                               
@@ -259,18 +284,20 @@ if __name__ == "__main__":
     
     
     ###make a dict for use: articletitle-score
-    student_articlescore_dict = {}
-    for studentarticle in student_articlescores:
-        title = studentarticle[0]
-        pageid = studentarticle[4]
-        courseid = studentarticle[3]
-        start_quality = studentarticle[-6]
-        start_quality_prob = studentarticle[-5]
-        end_quality = studentarticle[-3]
-        end_quality_prob = studentarticle[-2]
-        student_articlescore_dict[title] = [pageid, courseid,start_quality,start_quality_prob,end_quality,end_quality_prob]
-   
-    pickle.dump( student_articlescore_dict, open( dir_file+"student_articlescore_dict.p", "wb" ) )      
+#    student_articlescore_dict = {}
+#    for studentarticle in student_articlescores:
+#        title = studentarticle[0]
+#        pageid = studentarticle[4]
+#        courseid = studentarticle[3]
+#        start_quality = studentarticle[-6]
+#        start_quality_prob = studentarticle[-5]
+#        end_quality = studentarticle[-3]
+#        end_quality_prob = studentarticle[-2]
+#        student_articlescore_dict[title] = [pageid, courseid,start_quality,start_quality_prob,end_quality,end_quality_prob]
+#   
+#    pickle.dump( student_articlescore_dict, open( dir_file+"student_articlescore_dict.p", "wb" ) )  
+    
+    student_articlescore_dict = pickle.load(open(dir_file+"student_articlescore_dict.p", "rb"))
     
     ########
     #handel controls
@@ -285,7 +312,8 @@ if __name__ == "__main__":
     
     ##for future use:
     ##make article author:
-    control_articlesauthor_dict =  article_author(control_articles_df) #article-control    
+    control_articlesauthor_dict =  article_author(control_articles_df) #article-control  
+    control_articles_authorlist_dict =  article_author_lst(control_articles_df) #article-control-list of authors  
     ##control-article dictionary
     control_author_dict = article_author2(control_articles_df) #control-article
    
@@ -422,12 +450,89 @@ if __name__ == "__main__":
         f.close()
     
     
+    ####article-authors matching######
+    courseDict = courseInfoDict(dir_file, coureseInfofile)
+    #add course info to students using #courseDict
+    article_authors_lst = []
+    
+    for studentline in student_articlescores:
+        title = studentline[0]
+        mainauthor = student_articlesauthor_dict[title]
+        authorlist = ["||".join(student_articles_authorlist_dict[title])]
+        pageid = studentline[4]
+        coureseId = str(studentline[3])
+        courseinfo = courseDict[coureseId] #[group, classsize]
+        scores = studentline[-6:]
+        student_article_scores = [title, pageid, coureseId] + mainauthor + courseinfo + scores + authorlist
+        article_authors_lst.append(student_article_scores)
+    
+    for controlline in control_articlescores:
+        title = controlline[0]
+        mainauthor = control_articlesauthor_dict[title]
+        authorlist = ["||".join(control_articles_authorlist_dict[title])]
+        pageid = controlline[3]
+        courseinfo = ["-1", "1", "0"] #[group, classsize]
+        scores = controlline[-6:]
+        control_article_scores = [title, pageid, ""] + mainauthor + courseinfo + scores + authorlist
+        article_authors_lst.append(control_article_scores)
     
     
+    unique_data = [list(x) for x in set(tuple(x) for x in article_authors_lst)]
+    #'title,pageid,group,classsize,start_quallevel,start_quallevel_prob,start_qual_aggre,end_quallevel,end_quallevel_prob,end_qual_aggre'
+
+
+    
+    i = 0
+    outString = 'pageid,courseId,author,author_prop,group,classsize,group_ind,start_quallevel,start_quallevel_prob,start_qual_aggre,end_quallevel,end_quallevel_prob,end_qual_aggre,authorlst'
+    for lst in unique_data:
+        i += 1
+        strlst = [str(x) for x in lst[1:]]
+        outString += '\n'
+        outString += ','.join(strlst)
+        
+#    result_path = '{}/results'.format(file_loc)
+#    if not os.path.exists(result_path):
+#        os.makedirs(result_path)
+        
+    with open(dir_file+"quality_authorlist.csv", 'w') as f:
+        f.write(outString)
+        f.close()
+   
     
     
+def quality():
+    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/datafanalysis/"
+    file = "duringSocializationQuality_uniqueArticleUnit.csv"
+    
+    data = pd.read_csv(dir_file+file)
+    data.columns.values
+    
+    article_author_alllist = []
+    articlegrouped = data.groupby(["pageid","author","courseID","author_prop","group","control_wikied","indiv_group","classsize"])
+    
+    n=0
+    for articlegroup in articlegrouped:
+        n+=1
+        if n%100==0: print (n)
+        #if n==2: break
+        uniqueArticle = list(articlegroup[0])
+        groupdata_scores = articlegroup[1][["start_quallevel","start_quallevel_prob","start_qual_aggre","end_quallevel","end_quallevel_prob","end_qual_aggre"]]
+        groupdata_scores_lst = list(groupdata_scores.mean())
+        uniqueArticle_score_lst = uniqueArticle + groupdata_scores_lst
+        article_author_alllist.append(uniqueArticle_score_lst)
+    return article_author_alllist
     
     
-    
-    
+def writeout(article_author_alllist):
+    i = 0
+    outString = '"pageid","selected","author","courseID","author_prop","group","control_wikied","indiv_group","classsize","start_quallevel","start_quallevel_prob","start_qual_aggre","end_quallevel","end_quallevel_prob","end_qual_aggre"'
+    for lst in article_author_alllist:
+        i += 1
+        strlst = [str(x) for x in lst]
+        outString += '\n'
+        outString += ','.join(strlst)
+                
+    with open(dir_file+"duringSocializationQuality_uniqueArticleUnit2.csv", 'w') as f:
+        f.write(outString)
+        f.close()    
     

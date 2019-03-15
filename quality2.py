@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Feb 17 11:54:16 2019
+this is to do the author map
 
 @author: angli
 """
@@ -16,71 +17,66 @@ import requests
 from collections import Counter
 from utilities import GetPageRevision
 from utilities import returnJsonCheck
+from functools import reduce
 
-def articleRevision(articles):
-    """
-    input articles as df, columns as: ['title', 'startdate', 'enddate','student_courseID']
-    output two article df, columns as: ['title', 'startdate', 'enddate','student_courseID', 'pageid', 'parent_start', 'start_revid', 'end_revid'] 
-    with timepoint revision ids: start_revid, end_revid
-    """
-    df = articles
-    articles_extended = []
-    n=0
-    for ind, row in df.iterrows():
-        n+=1
-        if n%100==0: print(n)
-        
-        row_lst = list(row)
-        title = row_lst[0]
-        startdate = row_lst[1]
-        enddate = row_lst[2]
-        starttime = startdate+"T00:00:00Z"
-        endtime = enddate+"T00:00:00Z"
-        url = "https://en.wikipedia.org/w/api.php?action=query&format=json&rvdir=newer&rvlimit=500&prop=revisions&rvstart={}&rvend={}&rvprop=ids|timestamp|user|userid&titles={}".format(starttime, endtime, title)
-        pageid, contri_lst = GetPageRevision(url)
-        if len(contri_lst)>0:
-            firstparent = contri_lst[0]['parentid']
-            first = contri_lst[0]['revid']
-            last = contri_lst[-1]['revid']
-            articleinfo_lst = row_lst + [pageid, firstparent, first, last]
-            articles_extended.append(articleinfo_lst)
+
+
+def returnIDX(course_lst, course_intersect):
+    IDX = []
+    for i in range(len(course_lst)):
+        item = course_lst[i]
+        if any(elem in item for elem in course_intersect):
+            #print (item)
+            IDX.append(i)
+    return IDX    
+
+def reviseAuthor(row):
+    mainauthor = row['author']
+    courseID = row['courseID']
+    group = row['control_wikied']
+    if group == -2:
+        finalauthors = mainauthor
+    else:
+        author_lst = row['authors'].split("||")
+        course_lst = [course_dict[x] for x in author_lst]
+        course_intersect = list(reduce(set.intersection, [set(item) for item in course_lst ]))
+        if len(course_intersect) == 0:
+            finalauthors = mainauthor
+        elif str(courseID) in course_intersect:
+            indx = returnIDX(course_lst, course_intersect)
+            finalauthors = '||'.join([author_lst[i] for i in indx])
         else:
-            articleinfo_lst = row_lst + [pageid, None, None, None]
-    return articles_extended
-
-
-def timedict(timepoint_df, student_df):
-    
-    alltimepoints = {}
-    for ind, row in student_df.iterrows():
-        student_wpid, student_start, student_end = row['student_userid'], row['startdate'], row['enddate'] 
-        alltimepoints[student_wpid] = [student_start, student_end]
-    
-    for ind, row in timepoint_df.iterrows():
-        control_wpid, control_start, control_end = row['startcontrol_userid'], row['startdate'], row['enddate']
-        alltimepoints[control_wpid] = [control_start, control_end]
-    
-    return alltimepoints
-
+            finalauthors = mainauthor
+    return finalauthors
 
 if __name__ == "__main__":
-    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/"
-    studentfile = "students_contributes_semester.csv"
-    articlefile = "duringSocializationQuality_uniqueArticleUnit2.csv"
-    alltimepoint = "control_students_all.csv"
+    dir_file = "/Users/jiajunluo/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Project/Data/finalRevise/final/"
+    coureseInfofile = "datafanalysis/fullstudentset_updatedgroup.csv"
+    article_author = "datafanalysis/duringSocializationQuality_uniqueArticleUnit_authormap.csv"
     
-    student_allcontri = pd.read_csv(dir_file+studentfile)
-    student_df = student_allcontri[['student_username', 'student_userid', 'student_courseID','startdate', 'enddate']].drop_duplicates()
+    f = open(dir_file+coureseInfofile, 'r')
+    courseinfo = f.readlines()
+    f.close()
+
     
-    timepoint_df = pd.read_csv(dir_file+alltimepoint)
-    timepoint_df.columns.values
+    course_dict = {}
+    for line in courseinfo[1::]:
+        lst = line.split(",")
+        courseID = lst[0]
+        wikied = lst[-10]
+        if wikied in course_dict.keys():
+            course_dict[wikied].append(courseID)
+        else:
+            course_dict[wikied] = [courseID]
+    course_dict.pop('#N/A', None)
+    course_dict.pop('0', None)
     
-    timepoints_dict = timedict(timepoint_df, student_df)
+    authormap_df = pd.read_csv(dir_file+article_author)
+    authormap_df["updated_classauthor"] = authormap_df.apply(reviseAuthor, axis=1)
+    authormap_df.to_csv(dir_file+"duringSocializationQuality_uniqueArticleUnit_authormap_updated.csv", index=False)
     
-    #collect article revision data
-    articledata_df = pd.read_csv(dir_file+articlefile)
-    articledata_df.columns.values
-    
+    row = authormap_df.iloc[2]
+    reviseAuthor(row)
     
     
     
