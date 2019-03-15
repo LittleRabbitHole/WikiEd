@@ -35,8 +35,8 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 ##effort##
 
 medfit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
-medfit <- lmer(article_edits_log ~ control_wikied  + class_size_log + (1|courseID), data = user_data)
 summary(medfit)
+medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
 ls_means(medfit, pairwise=TRUE)
 
 # (group > individual/control, control < indiv/group)
@@ -83,41 +83,47 @@ ls_means(medfit, pairwise=TRUE)
 
 
 ####During semester quality#######
-user_data = read.csv("duringSocializationQuliaty_editorunit.csv", stringsAsFactors=FALSE)
+#user_data = read.csv("duringSocializationQuliaty_editorunit.csv", stringsAsFactors=FALSE)
 user_data = read.csv("duringSocializationQuality_uniqueArticleUnit2.csv", stringsAsFactors=FALSE)
-user_data = user_data[which(user_data$author_prop==1),]
+#user_data = user_data[which(user_data$author_prop==1),]
 
-user_data = read.csv("duringSocializationQuality_uniqueArticleUnit2.csv", stringsAsFactors=FALSE)
-user_data = user_data[c("pageid", "control_wikied", "indiv_group", "courseID","classsize", "start_qual_aggre",  "end_qual_aggre")]
+#user_data = read.csv("duringSocializationQuality_uniqueArticleUnit_share.csv", stringsAsFactors=FALSE)
+user_data = user_data[c("pageid", "control_wikied", "group_recheck","start_qual_aggre",  "end_qual_aggre")]
 user_data = unique(user_data)
 colnames(user_data)
 
-user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
-user_data$start_quallevel_prob = as.numeric(as.character(user_data$start_quallevel_prob))
 user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
-
-user_data$start_qual = user_data$start_quallevel + user_data$start_quallevel_prob
-
-user_data$end_quallevel = as.numeric(as.character(user_data$end_quallevel))
-user_data$end_quallevel_prob = as.numeric(as.character(user_data$end_quallevel_prob))
 user_data$end_qual_aggre = as.numeric(as.character(user_data$end_qual_aggre))
 
-user_data$end_qual = user_data$end_quallevel + user_data$end_quallevel_prob
+user_data$start_quallevel = as.numeric(as.character(user_data$start_quallevel))
+user_data$end_quallevel = as.numeric(as.character(user_data$end_quallevel))
 
-user_data$diff = user_data$end_qual - user_data$start_qual
+user_data$diff1 = user_data$end_quallevel - user_data$start_quallevel
 user_data$diff2 = user_data$end_qual_aggre - user_data$start_qual_aggre
 #user_data[is.na(user_data)] <- 0
-user_data = na.omit(user_data)
-#user_data = user_data[which(user_data$article_count>0),]
+#user_data = na.omit(user_data)
 
+
+colnames(user_data)
 user_data$control_wikied = as.factor(user_data$control_wikied)
 summary(user_data$control_wikied)
-user_data$indiv_group = as.factor(user_data$indiv_group)
+user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$classsize + 0.1)
 
-summary(user_data$diff2)
+user_data_stu = user_data[which(user_data$control_wikied==1),]
+summary(user_data_stu$diff2)
+summary(user_data_stu$diff1)
+medfit <- lmer(diff1 ~ #start_quallevel
+               +control_wikied 
+               + class_size_log + (1|courseID), data = user_data)
+summary(medfit)
+ls_means(medfit)
+
+
+
+
 
 medfit <- lmer(diff2 ~ indiv_group + control_wikied 
                + class_size_log + (1|courseID), data = user_data)
@@ -128,17 +134,6 @@ medfit <- lmer(diff2 ~ indiv_group
 
 ls_means(medfit, pairwise=TRUE)
 
-##retention##
-model2a1 <- coxph(SurvObj ~ article_edit_log + talk_count_log + usertalk_count_log
-                  + user_count_log + unique_articles_log +class_size_log + ave_sizediff_norm
-                  + control_wikied  
-                  + indiv_group
-                  + cluster(courseID),
-                  #ties = "breslow",
-                  data = user_data)
-summary(model2a1) 
-AIC(model2a1) 
-
 
 ####after semester#######
 user_data = read.csv("afterSocialization_effort_retention_v2.csv")
@@ -146,7 +141,7 @@ colnames(user_data)
 #user_data[is.na(user_data)] <- 0
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
-user_data$indiv_group = as.factor(user_data$indiv_group)
+#user_data$indiv_group = as.factor(user_data$indiv_group)
 user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
@@ -165,23 +160,12 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 
 med1.fit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
 summary(med1.fit)
+medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
 ls_means(medfit, pairwise=TRUE)
-medfit <- lmer(article_edits_log ~ control_wikied  + class_size_log + (1|courseID), data = user_data)
-ls_means(medfit)
 
 # (control < indiv/group)
 
 ##retention##
-model2a1_fit <- survfit(coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
-                            #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
-                            class_size_log
-                          + control_wikied  
-                          + indiv_group
-                          + cluster(courseID)
-                          +strata(indiv_group),
-                          #ties = "breslow",
-                          data = user_data))
-ggsurvplot(model2a1_fit,data = user_data)
 
 model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                   #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
@@ -220,7 +204,7 @@ user_data$reach_in_stu_log = log(user_data$reach_in_stu +0.1)
 user_data$reach_in_wiki_log = log(user_data$reach_in_wiki + 0.1)
 
 
-user_data$group_group = as.factor(user_data$indiv_group)
+user_data$group_group = as.factor(user_data$group_recheck)
 summary(user_data$group_group)
 
 user_data$courseID = as.factor(user_data$courseID)
@@ -228,7 +212,7 @@ length(unique(user_data$courseID))
 
 model2a1 <- coxph(SurvObj ~ #reach_out_stu_log + reach_out_wiki_log + reach_in_stu_log + reach_in_wiki_log
                     #+ group_group 
-                  score_diff
+                  #score_diff
                   + cluster(courseID)
                   + article_edit_log + talk_count_log +usertalk_count_log+ user_count_log+unique_articles_log + ave_sizediff_norm + student_count_log, 
                   data = user_data)
@@ -237,11 +221,16 @@ summary(model2a1)
 
 model2a2 <- coxph(SurvObj ~ reach_out_stu_log + reach_out_wiki_log + reach_in_stu_log + reach_in_wiki_log
                   + group_group 
-                  + score_diff
+                  #+ score_diff
                   + article_edit_log + talk_count_log +usertalk_count_log+ user_count_log+unique_articles_log + ave_sizediff_norm + student_count_log
                   + cluster(courseID), 
                   data = user_data)
 summary(model2a2) #0.029
 AIC(model2a) #286720
 
+
+med1.fit <- lmer(article_edit_log ~ reach_out_stu_log + reach_out_wiki_log + reach_in_stu_log + reach_in_wiki_log
+                   + group_group + student_count_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
 
