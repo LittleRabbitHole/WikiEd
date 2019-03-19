@@ -234,3 +234,58 @@ med1.fit <- lmer(article_edit_log ~ reach_out_stu_log + reach_out_wiki_log + rea
                  + (1|courseID), data = user_data)
 summary(med1.fit)
 
+
+##double check
+
+setwd("/Users/jiajunluo/GoogleDrive/GoogleDrive_Pitt_PhD/Wiki_Ed_Collaboration/Data_finalRevise")
+user_data = read.csv("article_with_commu_data_log_1.csv")
+colnames(user_data)
+user_data$start_qual_aggre = as.numeric(as.character(user_data$start_qual_aggre))
+user_data$end_qual_aggre = as.numeric(as.character(user_data$end_qual_aggre))
+summary(as.factor(user_data$group_recheck))
+
+##social interaction --> quality
+medfit <- lmer(end_qual_aggre ~ start_qual_aggre 
+               #+ as.factor(group_recheck) 
+               + out_stu_log + in_stu_log + in_wikipedians_log + out_wikipedians_log
+               + classsize_log + (1|courseID), data = user_data)
+summary(medfit)
+ls_means(medfit)
+
+
+user_data$diff = user_data$end_qual_aggre - user_data$start_qual_aggre
+## group --> quality
+medfit <- lmer(end_qual_aggre ~ start_qual_aggre + as.factor(group_recheck) 
+               + classsize_log + (1|courseID), data = user_data)
+summary(medfit)
+
+ls_means(medfit)
+
+#group --> social interaction
+med1.fit <- lmer(in_stu_log ~ as.factor(group_recheck) + classsize_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
+
+med1.fit <- lmer(out_stu_log ~ as.factor(group_recheck) + classsize_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
+
+med1.fit <- lmer(in_wikipedians_log ~ as.factor(group_recheck) + classsize_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
+
+med1.fit <- lmer(out_wikipedians_log ~ as.factor(group_recheck) + classsize_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
+
+
+med1.fit <- lmer(end_qual_aggre ~ as.factor(group_recheck) + classsize_log 
+                 + (1|courseID), data = user_data)
+summary(med1.fit)
+
+##step3: 
+medfit <- lmer(end_qual_aggre ~ start_qual_aggre + as.factor(group_recheck) 
+               + out_stu_log + in_stu_log + in_wikipedians_log + out_wikipedians_log
+               + classsize_log + (1|courseID), data = user_data)
+summary(medfit)
+ls_means(medfit)
