@@ -30,8 +30,16 @@ for line in courseinfo[1::]:
         course_dict[wikied] = [courseID]
     
 
+file = "controlgroup_contributes_afterSemester.csv"
+file = "controlgroup_contributes_semester.csv"
 
 data = pd.read_csv(dir_file+file)
+
+###check teahouse
+check_data = data[['control_wpid', 'control_userid']].loc[data['title'].str.contains("Wikipedia:Teahouse|Wikipedia talk:Teahouse")==True].drop_duplicates()
+#Wikipedia:Teahouse; Wikipedia talk:Teahouse
+
+check_data = data[['control_wpid', 'control_userid']].loc[data['title'].str.contains("Wikipedia:Teahouse|Wikipedia talk:Teahouse")==True].drop_duplicates()
 
 article_data = data[['student_username', 'student_userid', 'student_courseID', 'ns', 'title']].loc[data['ns']==0]
 article_data = article_data.drop_duplicates()
