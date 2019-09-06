@@ -137,6 +137,7 @@ ls_means(medfit, pairwise=TRUE)
 
 ####after semester#######
 user_data = read.csv("afterSocialization_effort_retention_v2.csv")
+user_data = read.csv("afterSocialization_effort_retention_v2.csv")
 colnames(user_data)
 #user_data[is.na(user_data)] <- 0
 
@@ -155,6 +156,13 @@ user_data$ave_sizediff_norm= scale(user_data$ave_sizediff,center = TRUE, scale =
 user_data$SurvObj <- with(user_data, Surv(dayindex, death == 1))
 
 user_data$article_edits_log= log(user_data$article_count + 0.1)
+
+#
+control = user_data[which(user_data$control_wikied==-2),]
+wikied = user_data[which(user_data$control_wikied==1),]
+
+quantile(control$article_count, probs = c(0.5, 0.75, 0.98, 1))
+quantile(wikied$article_count, probs = c(0.5, 0.75, 0.98, 1))
 
 ##effort##
 
