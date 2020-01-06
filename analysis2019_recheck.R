@@ -35,9 +35,10 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 
 ##effort##
 
-medfit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
+medfit <- lmer(article_edits_log ~  control_wikied + class_size_log + (1|courseID), data = user_data)
 summary(medfit)
 medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+summary(medfit)
 ls_means(medfit, pairwise=TRUE)
 
 
@@ -88,7 +89,7 @@ ls_means(medfit)
 
 
 
-medfit <- lmer(diff2 ~ indiv_group + control_wikied 
+medfit <- lmer(diff2 ~ control_wikied 
                + class_size_log + (1|courseID), data = user_data)
 summary(medfit)
 
@@ -106,8 +107,8 @@ colnames(user_data)
 user_data = merge(re_check, user_data,  by.x = "after", by.y = "control_wpid")
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
-#user_data$indiv_group = as.factor(user_data$indiv_group)
-user_data$indiv_group = as.factor(user_data$group_recheck)
+user_data$indiv_group = as.factor(user_data$indiv_group)
+#user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
 user_data$class_size_log= log(user_data$class_size + 0.1)
@@ -130,9 +131,10 @@ quantile(wikied$article_count, probs = c(0.5, 0.75, 0.98, 1))
 
 ##effort##
 
-med1.fit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
+med1.fit <- lmer(article_edits_log ~  control_wikied + class_size_log + (1|courseID), data = user_data)
 summary(med1.fit)
 medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+summary(medfit)
 ls_means(medfit, pairwise=TRUE)
 
 # (control < indiv/group)

@@ -35,6 +35,7 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 ##effort##
 
 medfit <- lmer(article_edits_log ~ indiv_group + control_wikied + class_size_log + (1|courseID), data = user_data)
+medfit <- lmer(article_edits_log ~ control_wikied + class_size_log + (1|courseID), data = user_data)
 summary(medfit)
 medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
 ls_means(medfit, pairwise=TRUE)
