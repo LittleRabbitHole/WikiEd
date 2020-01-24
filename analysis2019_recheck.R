@@ -11,10 +11,12 @@ setwd("/Users/angli/ANG/OneDrive/Documents/Pitt_PhD/ResearchProjects/Wiki_Edu_Pr
 user_data = read.csv("duringSocialization_effort_retention.csv")
 colnames(user_data)
 
-re_check = read.csv("re_check.csv")
+re_check = read.csv("re_check_2.csv")
 
 user_data = merge(re_check, user_data,  by.x = "during", by.y = "control_wpid", all.x = TRUE)
+#user_data = unique(user_data)
 
+########
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
 summary(user_data$control_wikied)
@@ -105,6 +107,7 @@ user_data = read.csv("afterSocialization_effort_retention_v2.csv")
 colnames(user_data)
 
 user_data = merge(re_check, user_data,  by.x = "after", by.y = "control_wpid")
+user_data = unique(user_data)
 
 user_data$control_wikied = as.factor(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$indiv_group)
