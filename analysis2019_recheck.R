@@ -23,6 +23,12 @@ summary(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
+user_data$WikiEd = 0
+user_data$WikiEd[which(user_data$control_wikied == 1)] = 1
+#user_data$WikiEd = as.factor(user_data$WikiEd)
+summary(user_data$WikiEd)
+
+
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)
 user_data$talk_count_log= log(user_data$talk_count + 0.1) 
@@ -37,9 +43,9 @@ user_data$article_edits_log= log(user_data$article_count + 0.1)
 
 ##effort##
 
-medfit <- lmer(article_edits_log ~  control_wikied + class_size_log + (1|courseID), data = user_data)
+medfit <- lmer(article_edits_log ~  control_wikied + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit)
-medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
+medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit)
 ls_means(medfit, pairwise=TRUE)
 
@@ -76,27 +82,23 @@ summary(user_data$control_wikied)
 user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
+user_data$WikiEd = 0
+user_data$WikiEd[which(user_data$control_wikied == 1)] = 1
+#user_data$WikiEd = as.factor(user_data$WikiEd)
+summary(user_data$WikiEd)
+
+
 user_data$class_size_log= log(user_data$classsize + 0.1)
 
 user_data_stu = user_data[which(user_data$control_wikied==1),]
 summary(user_data_stu$diff2)
 #summary(user_data_stu$diff1)
-medfit <- lmer(diff1 ~ #start_quallevel
-                 +control_wikied 
-               + class_size_log + (1|courseID), data = user_data)
-summary(medfit)
-ls_means(medfit)
-
-
-
 
 
 medfit <- lmer(diff2 ~ control_wikied 
-               + class_size_log + (1|courseID), data = user_data)
+               + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit)
 
-medfit <- lmer(diff2 ~ indiv_group
-               + class_size_log + (1|courseID), data = user_data)
 
 ls_means(medfit, pairwise=TRUE)
 
@@ -114,6 +116,12 @@ user_data$indiv_group = as.factor(user_data$indiv_group)
 #user_data$indiv_group = as.factor(user_data$group_recheck)
 summary(user_data$indiv_group)
 
+user_data$WikiEd = 0
+user_data$WikiEd[which(user_data$control_wikied == 1)] = 1
+#user_data$WikiEd = as.factor(user_data$WikiEd)
+summary(user_data$WikiEd)
+
+
 user_data$class_size_log= log(user_data$class_size + 0.1)
 user_data$article_edit_log= log(user_data$article_count + 0.1)
 user_data$talk_count_log= log(user_data$talk_count + 0.1) 
@@ -125,20 +133,11 @@ user_data$SurvObj <- with(user_data, Surv(dayindex, death == 1))
 
 user_data$article_edits_log= log(user_data$article_count + 0.1)
 
-#
-control = user_data[which(user_data$control_wikied==-2),]
-wikied = user_data[which(user_data$control_wikied==1),]
-
-quantile(control$article_count, probs = c(0.5, 0.75, 0.98, 1))
-quantile(wikied$article_count, probs = c(0.5, 0.75, 0.98, 1))
 
 ##effort##
 
-med1.fit <- lmer(article_edits_log ~  control_wikied + class_size_log + (1|courseID), data = user_data)
+med1.fit <- lmer(article_edits_log ~  control_wikied + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(med1.fit)
-medfit <- lmer(article_edits_log ~ indiv_group  + class_size_log + (1|courseID), data = user_data)
-summary(medfit)
-ls_means(medfit, pairwise=TRUE)
 
 # (control < indiv/group)
 
@@ -146,9 +145,9 @@ ls_means(medfit, pairwise=TRUE)
 
 model2a1 <-coxph(SurvObj ~ #article_edit_log + talk_count_log + usertalk_count_log
                    #+ user_count_log + unique_articles_log  + ave_sizediff_norm +
-                   class_size_log
+                   class_size_log:WikiEd
                  + control_wikied  
-                 + indiv_group
+                 #+ indiv_group
                  + cluster(courseID),
                  #ties = "breslow",
                  data = user_data)
