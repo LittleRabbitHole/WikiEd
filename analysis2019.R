@@ -129,14 +129,27 @@ user_data_stu = user_data[which(user_data$control_wikied==1),]
 summary(user_data_stu$diff2)
 
 
-medfit <- lmer(diff2 ~ control_wikied 
+medfit1 <- lmer(diff2 ~ control_wikied 
                + class_size_log:WikiEd + (1|courseID), data = user_data)
-summary(medfit)
+summary(medfit1)
+ls_means(medfit1)
 
-medfit <- lmer(diff2 ~ indiv_group
+medfit2 <- lmer(diff2 ~ indiv_group
                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit2)
 
-ls_means(medfit, pairwise=TRUE)
+ls_means(medfit2)
+#----
+
+medfit1 <- lmer(end_qual_aggre ~ start_qual_aggre + control_wikied 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit1)
+ls_means(medfit1)
+
+medfit2 <- lmer(end_qual_aggre ~ start_qual_aggre + indiv_group
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit2)
+ls_means(medfit2)
 
 
 ####after semester#######
