@@ -136,17 +136,28 @@ ls_means(medfit1)
 
 medfit2 <- lmer(diff2 ~ indiv_group
                + class_size_log:WikiEd + (1|courseID), data = user_data)
-summary(medfit2)
+summary(msedfit2)
 
 ls_means(medfit2)
 #----
+
+medfit1 <- lmer(start_qual_aggre ~ control_wikied 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit1)
+ls_means(medfit1)
 
 medfit1 <- lmer(end_qual_aggre ~ start_qual_aggre + control_wikied 
                 + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit1)
 ls_means(medfit1)
 
+
 medfit2 <- lmer(end_qual_aggre ~ start_qual_aggre + indiv_group
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit2)
+ls_means(medfit2)
+
+medfit2 <- lmer(start_qual_aggre ~ indiv_group
                 + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit2)
 ls_means(medfit2)
