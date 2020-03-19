@@ -131,14 +131,28 @@ summary(user_data_stu$diff2)
 
 medfit1 <- lmer(diff2 ~ control_wikied 
                + class_size_log:WikiEd + (1|courseID), data = user_data)
+
+medfit1 <- lmer(end_qual_aggre ~  control_wikied 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+medfit1 <- lmer(start_qual_aggre ~ control_wikied 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
 summary(medfit1)
 ls_means(medfit1)
 
+0.255-0.047
 medfit2 <- lmer(diff2 ~ indiv_group
                + class_size_log:WikiEd + (1|courseID), data = user_data)
-summary(msedfit2)
+summary(medfit2)
 
 ls_means(medfit2)
+
+medfit1 <- lmer(end_qual_aggre ~  indiv_group 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+medfit1 <- lmer(start_qual_aggre ~ indiv_group 
+                + class_size_log:WikiEd + (1|courseID), data = user_data)
+summary(medfit1)
+ls_means(medfit1)
+
 #----
 
 medfit1 <- lmer(start_qual_aggre ~ control_wikied 
