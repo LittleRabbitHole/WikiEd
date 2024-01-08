@@ -8,5 +8,7 @@ Attracting and retaining newcomers is critical and challenging for online produc
 
 This paper is published at CSCW2020:
 
-Ang Li, Zheng Yao, Diyi Yang, Chinmay Kulkarni, Rosta Farzan, and Robert E. Kraut. 2020. Successful Online Socialization: Lessons from the Wikipedia Education Program. Proc. ACM Hum.-Comput. Interact. 4, CSCW1, Article 050 (May 2020), 24 pages. DOI:https://doi.org/10.1145/3392857
+Ang Li, Zheng Yao, Diyi Yang, Chinmay Kulkarni, Rosta Farzan, and Robert E. Kraut. 2020. Successful Online Socialization: Lessons from the Wikipedia Education Program. Proc. ACM Hum.-Comput. Interact. 4, CSCW1, Article 050 (May 2020), 24 pages. DOI:https://doi.org/10.1145/3392857     
+
+CSCW online presentation: https://www.youtube.com/watch?v=Ua5acwGVnRU
 
